@@ -168,8 +168,8 @@ def HandleSocketCollector(profile):
 
     # We just need the base objects for sockets.
     for entity in profile.session.entities.find_by_attribute(
-        "MemoryObject.type", "socket"):
-        connection, named = ParseSocket(entity["MemoryObject.base_object"])
+        "MemoryObject/type", "socket"):
+        connection, named = ParseSocket(entity["MemoryObject/base_object"])
 
         # The original entity /is/ the socket, so we just reuse the identity.
         yield entity.identity, (connection, named)
@@ -181,8 +181,8 @@ def HandleVnodeCollector(profile):
 
     # All we need are vnodes.
     for entity in profile.session.entities.find_by_attribute(
-        "MemoryObject.type", "vnode"):
-        file, named = ParseVnode(entity["MemoryObject.base_object"])
+        "MemoryObject/type", "vnode"):
+        file, named = ParseVnode(entity["MemoryObject/base_object"])
 
         yield entity.identity, (file, named)
 

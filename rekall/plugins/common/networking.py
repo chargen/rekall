@@ -60,26 +60,26 @@ class EntityNetstat(plugin.ProfileCommand):
         unix_socks = []
 
         for entity in entities:
-            af = entity["Connection.addressing_family"]
+            af = entity["Connection/addressing_family"]
             if af in ("AF_INET", "AF_INET6"):
                 # Inet socket.
                 row = [
-                    entity["Connection.protocols"][1],
-                    entity["Connection.src_addr"],
-                    entity["Connection.src_bind"],
-                    entity["Connection.dst_addr"],
-                    entity["Connection.dst_bind"],
-                    entity["Connection.state"],
+                    entity["Connection/protocols"][1],
+                    entity["Connection/src_addr"],
+                    entity["Connection/src_bind"],
+                    entity["Connection/dst_addr"],
+                    entity["Connection/dst_bind"],
+                    entity["Connection/state"],
                 ]
 
                 bucket = inet_socks
             elif af == "AF_UNIX":
                 # Unix socket
                 row = [
-                    entity["Connection.src_addr"],
-                    entity["Connection.dst_addr"],
-                    entity["Connection.protocols"][1],
-                    entity["Connection.src_bind"],
+                    entity["Connection/src_addr"],
+                    entity["Connection/dst_addr"],
+                    entity["Connection/protocols"][1],
+                    entity["Connection/src_bind"],
                 ]
 
                 bucket = unix_socks
@@ -88,10 +88,10 @@ class EntityNetstat(plugin.ProfileCommand):
 
             # A single socket can be open by 1 (most common), 0 or multiple
             # handles (fds) owned by one or more processes.
-            handles = list(entity.get_referencing_entities("Handle.resource"))
+            handles = list(entity.get_referencing_entities("Handle/resource"))
             for handle in handles:
-                proc = handle["Handle.process"]
-                bucket.append(row + proc["Process.pid", "Process.command"])
+                proc = handle["Handle/process"]
+                bucket.append(row + proc["Process/pid", "Process/command"])
 
             if not handles:
                 # No process has a handle on this.

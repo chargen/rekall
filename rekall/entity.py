@@ -28,6 +28,9 @@ from rekall import obj
 from rekall import superposition
 
 
+COMPONENT_RESOLUTION_OPERATOR="/"
+
+
 class Entity(object):
     """Entity is an abstraction of things like Process, User or Connection.
 
@@ -74,13 +77,13 @@ class Entity(object):
     They occur in cases where there are legitimately multiple valid values of a
     single attribute. Some examples:
 
-    Resource.handle can have multiple values, because a single file/socket can
+    Resource/handle can have multiple values, because a single file/socket can
     be opened by multiple handles owned by multiple processes.
 
-    MemoryObject.type can be a superposition in case of unions, or things that
+    MemoryObject/type can be a superposition in case of unions, or things that
     are stored as a void pointer and cast depending on contextual state.
 
-    User.real_name can often be a superposition because of variable formatting
+    User/real_name can often be a superposition because of variable formatting
     rules applied by the OS.
 
     Public state members:
@@ -161,7 +164,7 @@ class Entity(object):
             for field in component._fields:
                 val = getattr(component, field)
                 if val:
-                    key = "%s.%s" % (component_name, field)
+                    key = "%s/%s" % (component_name, field)
                     result[key] = val
 
         return result
@@ -199,7 +202,7 @@ class Entity(object):
             key: Property path in form of Component.attribute.
         """
         try:
-            component_name, attribute = key.split(".")
+            component_name, attribute = key.split(COMPONENT_RESOLUTION_OPERATOR)
         except ValueError:
             raise ValueError("%s is not a valid key." % key)
 
@@ -249,10 +252,10 @@ class Entity(object):
         Getting a basic value:
         ======================
 
-        Use key in form of Component.attribute. For example, "Process.pid" or
-        "User.username". Same as calling entity[key]:
+        Use key in form of Component/attribute. For example, "Process/pid" or
+        "User/username". Same as calling entity[key]:
 
-        entity["Process.pid"]  # PID of the process.
+        entity["Process/pid"]  # PID of the process.
 
         What if the value is an entity:
         ===============================
@@ -260,8 +263,8 @@ class Entity(object):
         This method automatically recognizes attributes that reference other
         entities and automatically looks them up and returns them. For example:
 
-        entity["Process.parent"]  # Returns the parent process entity.
-        entity["Process.parent"]["Process.pid"]  # PID of the parent.
+        entity["Process/parent"]  # Returns the parent process entity.
+        entity["Process/parent"]["Process/pid"]  # PID of the parent.
 
         What if I want all the child processes (Inverse Lookup):
         ========================================================
@@ -273,10 +276,10 @@ class Entity(object):
 
         For example:
 
-        entity["&Process.parent"]  # Returns processes of which this process is
+        entity["&Process/parent"]  # Returns processes of which this process is
                                    # (Child processes).
 
-        entity["&Handle.process"]  # Returns all handles this process has open.
+        entity["&Handle/process"]  # Returns all handles this process has open.
 
         When does this return more than one value:
         ==========================================
@@ -288,15 +291,15 @@ class Entity(object):
         proxy the [] operator, returning more superpositions. For example:
 
         # To return the pids of all child processes:
-        entity["&Process.parent"]["Process.pid"]
+        entity["&Process/parent"]["Process/pid"]
 
         You can request more than one key in a single call:
         ===================================================
 
         This is identical to the behavior of [] on python dictionaries:
 
-        entity["Process.pid", "Process.command"]  # is the same as calling:
-        (entity["Process.pid"], entity["Process.command"])
+        entity["Process/pid", "Process/command"]  # is the same as calling:
+        (entity["Process/pid"], entity["Process/command"])
         """
         # If we get called with [x, y] python will pass us the keys as a tuple
         # of (x, y). The following behaves identically to dict.
@@ -451,7 +454,7 @@ class EntityManager(object):
         if self.lookup_tables.get(key, None):
             return
 
-        component, _ = key.split(".")
+        component, _ = key.split(COMPONENT_RESOLUTION_OPERATOR)
 
         lookup_table = EntityLookupTable(
             key_name=key,
@@ -504,7 +507,7 @@ class EntityManager(object):
         Yields:
             Instances of entity that match the search criteria.
         """
-        component, _ = key.split(".")
+        component, _ = key.split(COMPONENT_RESOLUTION_OPERATOR)
         lookup_table = self.lookup_tables.get(key, None)
 
         if lookup_table:
