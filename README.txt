@@ -53,7 +53,7 @@ If you want to use the yarascan plugin, install yara and yara-python
 
 For windows, Rekall is also available as a self contained installer
 package. Please check the download page for the most appropriate installer to
-use (http://downloads.rekall.googlecode.com/git/index.html)
+use (http://www.rekall-forensic.com/download/)
 
 Mailing Lists
 =============
@@ -138,4 +138,4 @@ More documentation
 ==================
 
 Further documentation is available at
-http://docs.rekall.googlecode.com/git/index.html
+http://www.rekall-forensic.com/
